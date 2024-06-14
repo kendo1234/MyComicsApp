@@ -42,6 +42,24 @@ $(document).ready(function() {
         });
     });
 
+    // Handle delete form submission
+    $('#deleteForm').on('submit', function(e) {
+        e.preventDefault();
+        let title = $('#deleteTitle').val().trim().toLowerCase();
+
+        $.ajax({
+            url: `/comics/title/${title}`,
+            method: 'DELETE',
+            success: function(data) {
+                $('#results').html('<div class="alert alert-success">Comic deleted successfully!</div>');
+                $('#deleteForm')[0].reset();
+            },
+            error: function() {
+                $('#results').html('<div class="alert alert-danger">Failed to delete comic.</div>');
+            }
+        });
+    });
+
     // Function to display search results
     function displayResults(data) {
         if (data.length === 0) {

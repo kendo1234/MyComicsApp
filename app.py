@@ -51,7 +51,38 @@ def get_comic_by_writer(writer):
 def add_comic():
     new_comic = request.json
     comics_data.append(new_comic)
+
+    # Append new comic to the DataFrame
+    df_new_comic = pd.DataFrame([new_comic])
+    df_new_comic.columns = df_new_comic.columns.str.capitalize()  # Ensure column names match the Excel format
+    global df
+    df = pd.concat([df, df_new_comic], ignore_index=True)
+
+    # Write the updated DataFrame back to the Excel file
+    df.to_excel('Comics.xlsx', index=False)
+
     return jsonify(new_comic), 201
+
+
+@app.route('/comics/title/<title>', methods=['DELETE'])
+def delete_comic_by_title(title):
+    title = title.strip().lower()
+    global comics_data
+    new_comics_data = [comic for comic in comics_data if
+                       'Title' not in comic or comic['Title'].strip().lower() != title]
+
+    if len(new_comics_data) == len(comics_data):
+        return jsonify({"error": "Comic not found"}), 404
+
+    comics_data = new_comics_data
+
+    # Update the DataFrame and write to Excel
+    global df
+    df = pd.DataFrame(comics_data)
+    df.columns = df.columns.str.capitalize()  # Ensure column names match the Excel format
+    df.to_excel('Comics.xlsx', index=False)
+
+    return jsonify({"message": "Comic deleted successfully"}), 200
 
 
 if __name__ == '__main__':
